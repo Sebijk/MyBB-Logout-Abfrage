@@ -14,21 +14,33 @@ if( !defined('IN_MYBB') )
 
 /** Hooks einbinden **/
 $plugins->add_hook("global_end", "logout_js");
-$plugins->add_hook("pre_output_page", "logout");
 
 /** Infos über Logout Abfrage **/
 function logout_info()
 {
 	return array(
-		"name"			=> "Logout Abfrage",
+		"name"			=> "Logout Abfrage / Logout ask",
 		"description"	=> "Fragt den Benutzer ob er sich wirklich abmelden möchte.",
 		"website"		=> "http://www.sebijk.com",
 		"author"		=> "Home of the Sebijk.com",
 		"authorsite"	=> "http://www.sebijk.com",
-		"version"		=> "1.4",
+		"version"		=> "1.5",
 		"guid" 			=> "",
-    "compatibility" => "16*" 
+        "compatibility" => "18*" 
 	);
+}
+
+function logout_activate()
+{
+	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	find_replace_templatesets("header_welcomeblock_member", "#".preg_quote('action=logout&amp;logoutkey={$mybb->user[\'logoutkey\']}')."#i", 'action=logout&amp;logoutkey={$mybb->user[\'logoutkey\']}" onclick="return log_out()');
+}
+
+// This function runs when the plugin is deactivated.
+function logout_deactivate()
+{
+	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	find_replace_templatesets("header_welcomeblock_member", "#".preg_quote('action=logout&amp;logoutkey={$mybb->user[\'logoutkey\']}" onclick="return log_out()')."#i", 'action=logout&amp;logoutkey={$mybb->user[\'logoutkey\']}');
 }
 
 function logout_js() {
@@ -36,7 +48,7 @@ function logout_js() {
 	$lang->load("asklogout");
 
 	$headerinclude .= '<!-- start js code for logout -->
-	<script type="text/javascript" language="JavaScript">
+	<script type="text/javascript">
 	<!--
 	function log_out()
 	{
@@ -55,10 +67,5 @@ function logout_js() {
 	//-->
 	</script>
 	<!-- end js code for logout -->';
-}
-
-function logout($page) {
-	global $mybb;
-	$page = str_replace("action=logout&amp;logoutkey={$mybb->user['logoutkey']}", "action=logout&amp;logoutkey={$mybb->user['logoutkey']}\" onclick=\"return log_out()", $page); 
 }
 ?>
